@@ -40,11 +40,62 @@ void main(List<String> arguments) {
     '([+]?7){1}': RegExp(r'([+]?7){1}'), //find +7 or 7 one time
   };
 
-  for (var s in strings) {
-    print(s);
-    groupingSubexpressionsRegExp.forEach((key, value) {
-      print('$key ${value.hasMatch(s)}');
-    });
-    print('*' * 20);
+  final choicePatternsRegExp = {
+    '(a few|some|several)': RegExp(r'(a few|some|several)'),
+    '1 euro|(3|4|5) euros': RegExp(r'1 euro|(3|4|5) euros'),
+  };
+
+  final wordStringBoundariesRegExp = {
+    'me at the beginning word': RegExp(r'\bme'),
+    'me in the end of word': RegExp(r'me\b'),
+    'has separate word cost': RegExp('cost'),
+    'contains only It': RegExp(r'^It$'),
+    'starts with It': RegExp(r'^It'),
+    'ends with It': RegExp(r'It$'),
+  };
+
+  final namingGroupSubexpressionRegExp = {
+    'money': RegExp(r'(?<money>ruble|euro|pound)s?'),
+    'mobileOperator': RegExp(r'(?<mobileOperator>921|999|903)'),
+  };
+
+  RegExpMatch? match1 =
+      namingGroupSubexpressionRegExp['money']!.firstMatch(strings[1]);
+  RegExpMatch? match2 =
+      namingGroupSubexpressionRegExp['mobileOperator']!.firstMatch(strings[2]);
+  print(match1?.namedGroup('money'));
+  print(match2?.namedGroup('mobileOperator'));
+
+  /// Extracts file extension from string
+  String? extractExt(String fileName) {
+    final pattern = RegExp(r'\.(?<ext>[0-9a-zA-Z]+)$');
+    final match = pattern.firstMatch(fileName);
+    return match?.namedGroup('ext');
+  }
+
+  extractExt('verygoodfile.dart'); // 'dart'
+
+  /// Validates email string, *non ascii characters are not accepted*
+  bool isValidEmail(String email) {
+    final pattern = RegExp(
+        r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$');
+    return pattern.hasMatch(email.trim());
+  }
+
+  /// Password is valid if it has an uppercase, lowercase, number, symbol and has at least 8 characters
+  bool isPasswordValid(String password) {
+    final containsUpperCase = RegExp(r'[A-Z]').hasMatch(password);
+    final containsLowerCase = RegExp(r'[a-z]').hasMatch(password);
+    final containsNumber = RegExp(r'\d').hasMatch(password);
+    final containsSymbols =
+        RegExp(r'[`~!@#$%\^&*\(\)_+\\\-={}\[\]\/.,<>;]').hasMatch(password);
+    final hasManyCharacters = RegExp(r'^.{8,128}$', dotAll: true)
+        .hasMatch(password); // This is variable
+
+    return containsUpperCase &&
+        containsLowerCase &&
+        containsNumber &&
+        containsSymbols &&
+        hasManyCharacters;
   }
 }
